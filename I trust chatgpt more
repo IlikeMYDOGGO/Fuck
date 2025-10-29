@@ -1,0 +1,536 @@
+-- LINDWURM MODIFIED SCRIPT - PART 1 (REWORKED)
+-- Environment & Player Setup
+
+-- Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
+local UserInputService = game:GetService("UserInputService")
+
+-- Local Player
+local lp = Players.LocalPlayer
+local char = lp.Character or lp.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local hum = char:WaitForChild("Humanoid")
+
+-- Main Environment Function
+function MainEnv()
+    -- Reset any previous connections or effects
+    pcall(function()
+        if getgenv().pepe then getgenv().pepe:Disconnect() end
+    end)
+    getgenv().pepe = lp.CharacterAdded:Connect(function(c)
+        repeat task.wait() until c:FindFirstChild("HumanoidRootPart") and c:FindFirstChild("Humanoid")
+        task.wait(0.6)
+        MainEnv()
+    end)
+    
+    -- Default Flags
+    getgenv().SelfSacrifice = false
+    getgenv().Loop = false
+    getgenv().Move1 = true
+    getgenv().Move2 = true
+    getgenv().Move3 = true
+    getgenv().Move4 = true
+    getgenv().Move5 = true
+    getgenv().Move6 = true
+    getgenv().Move7 = true
+    
+    -- Clear old particle effects
+    for _, partName in pairs({"GlowS","_Lsmoke"}) do
+        for _, part in ipairs(char:GetChildren()) do
+            pcall(function() part[partName]:Destroy() end)
+        end
+    end
+    
+    -- Reset camera
+    workspace.CurrentCamera.CameraType = "Custom"
+end
+
+-- Initialize environment
+MainEnv()
+
+-- Notification for script load
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "LINDWURM MODIFIED";
+    Text = "Script Loaded. Self Sacrifice & moves ready.";
+    Duration = 4;
+    Button1 = "OK";
+})
+-- LINDWURM MODIFIED SCRIPT - PART 2 (REWORKED)
+-- Blood Edge (Move 1) & Hit Detection
+
+-- Ensure Move1 exists
+if getgenv().Move1 == true then
+    local ye = lp.PlayerGui.Main.Moveset:FindFirstChild("Blood Edge")
+    if ye then
+        ye.Tip.Text = "VARIANT"
+        ye.Tip.Visible = true
+    end
+
+    -- Cooldown tracking
+    local CD1 = Instance.new("StringValue")
+    CD1.Name = "InCooldown"
+    CD1.Value = "false"
+    CD1.Parent = ye
+
+    -- Blood Edge Keybind function
+    local function UseBloodEdge()
+        if CD1.Value == "true" then return end
+        CD1.Value = "true"
+
+        -- Play animation
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://84039122607068"
+        local k = hum:LoadAnimation(anim)
+        k:Play()
+        k.Priority = Enum.AnimationPriority.Action2
+        k:AdjustSpeed(1)
+
+        -- Detect hit target during the attack
+        local connection
+        connection = hrp.Touched:Connect(function(hit)
+            local model = hit:FindFirstAncestorOfClass("Model")
+            if model and model ~= char and model:FindFirstChild("Humanoid") then
+                -- Only trigger sky launch if SelfSacrifice is active
+                if getgenv().SelfSacrifice then
+                    -- Sky-launch sequence (moved to part 5 for control)
+                    getgenv().ReadyToSkyLaunch = true
+                end
+                connection:Disconnect()
+            end
+        end)
+
+        -- Wait for animation to finish
+        k.Stopped:Wait()
+        CD1.Value = "false"
+    end
+
+    -- Keybind
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+        if input.KeyCode == Enum.KeyCode.One then
+            task.spawn(UseBloodEdge)
+        end
+    end)
+
+    -- Clickable GUI
+    if ye then
+        ye.ItemName.MouseButton1Click:Connect(function()
+            task.spawn(UseBloodEdge)
+        end)
+    end
+end
+-- LINDWURM MODIFIED SCRIPT - PART 3 (REWORKED)
+-- Moves 2-4 & Basic Animations
+
+-- Move 2 - Blood Edge Special
+if getgenv().Move2 == true then
+    local ye2 = lp.PlayerGui.Main.Moveset:FindFirstChild("Blood Edge Special")
+    if not ye2 then
+        ye2 = lp.PlayerGui.Main.Moveset:FindFirstChild("Blood Edge"):Clone()
+        ye2.Parent = lp.PlayerGui.Main.Moveset
+        ye2.Name = "Blood Edge Special"
+    end
+    ye2.Tip.Text = "CLOSE RANGE"
+    ye2.Cooldown.Size = UDim2.new(1,0,0,0)
+
+    local CD2 = Instance.new("StringValue")
+    CD2.Name = "InCooldown"
+    CD2.Value = "false"
+    CD2.Parent = ye2
+
+    local function UseBloodEdgeSpecial()
+        if CD2.Value == "true" then return end
+        CD2.Value = "true"
+
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://140624814858590"
+        local k = hum:LoadAnimation(anim)
+        k:Play()
+        k.Priority = Enum.AnimationPriority.Action2
+        k:AdjustSpeed(1)
+
+        task.wait(1)
+        k:Stop()
+
+        -- Optional hit effect
+        _G.PS("3313098116",1,.3)
+
+        -- Cooldown reset
+        task.delay(2, function() CD2.Value = "false" end)
+    end
+
+    -- Keybind
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+        if input.KeyCode == Enum.KeyCode.Two then
+            task.spawn(UseBloodEdgeSpecial)
+        end
+    end)
+    -- GUI Click
+    ye2.ItemName.MouseButton1Click:Connect(function()
+        task.spawn(UseBloodEdgeSpecial)
+    end)
+end
+
+-- Move 3 - Mid-range Dash
+if getgenv().Move3 == true then
+    local ye3 = lp.PlayerGui.Main.Moveset:FindFirstChild("Mid Dash")
+    if not ye3 then
+        ye3 = lp.PlayerGui.Main.Moveset:FindFirstChild("Blood Edge"):Clone()
+        ye3.Parent = lp.PlayerGui.Main.Moveset
+        ye3.Name = "Mid Dash"
+    end
+    ye3.Tip.Text = "MID RANGE"
+    ye3.Cooldown.Size = UDim2.new(1,0,0,0)
+
+    local CD3 = Instance.new("StringValue")
+    CD3.Name = "InCooldown"
+    CD3.Value = "false"
+    CD3.Parent = ye3
+
+    local function UseMidDash()
+        if CD3.Value == "true" then return end
+        CD3.Value = "true"
+
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://119042572747325"
+        local k = hum:LoadAnimation(anim)
+        k:Play()
+        k.Priority = Enum.AnimationPriority.Action2
+        k:AdjustSpeed(1)
+
+        -- Dash forward
+        local bv = Instance.new("BodyVelocity")
+        bv.Parent = hrp
+        bv.MaxForce = Vector3.new(1e5,0,1e5)
+        bv.Velocity = hrp.CFrame.LookVector * 50
+        task.delay(.3, function() bv:Destroy() end)
+
+        task.wait(0.5)
+        k:Stop()
+
+        task.delay(1.5, function() CD3.Value = "false" end)
+    end
+
+    -- Keybind
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+        if input.KeyCode == Enum.KeyCode.Three then
+            task.spawn(UseMidDash)
+        end
+    end)
+    -- GUI Click
+    ye3.ItemName.MouseButton1Click:Connect(function()
+        task.spawn(UseMidDash)
+    end)
+end
+
+-- Move 4 - Supernova (basic launch setup, sky-launch is moved to Part 5)
+if getgenv().Move4 == true then
+    local ye4 = lp.PlayerGui.Main.Moveset:FindFirstChild("Supernova")
+    if not ye4 then
+        ye4 = lp.PlayerGui.Main.Moveset:FindFirstChild("Blood Edge"):Clone()
+        ye4.Parent = lp.PlayerGui.Main.Moveset
+        ye4.Name = "Supernova"
+    end
+    ye4.Tip.Text = "SKY LAUNCH VARIANT"
+    ye4.Cooldown.Size = UDim2.new(1,0,0,0)
+
+    local CD4 = Instance.new("StringValue")
+    CD4.Name = "InCooldown"
+    CD4.Value = "false"
+    CD4.Parent = ye4
+
+    -- Only sets up animation; actual sky launch handled by Part 5
+    local function UseSupernova()
+        if CD4.Value == "true" then return end
+        CD4.Value = "true"
+
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://100446064103831"
+        local k = hum:LoadAnimation(anim)
+        k:Play()
+        k.Priority = Enum.AnimationPriority.Action2
+        k:AdjustSpeed(1)
+
+        -- Wait for animation end
+        k.Stopped:Wait()
+        CD4.Value = "false"
+    end
+
+    -- Keybind
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+        if input.KeyCode == Enum.KeyCode.Four then
+            task.spawn(UseSupernova)
+        end
+    end)
+    -- GUI Click
+    ye4.ItemName.MouseButton1Click:Connect(function()
+        task.spawn(UseSupernova)
+    end)
+end
+-- LINDWURM MODIFIED SCRIPT - PART 4 (REWORKED)
+-- Move 4 (Supernova full launch) & Move 6 (Distortion)
+
+-- Move 4 (Supernova) Full Effect
+if getgenv().Move4 == true then
+    local ye4 = lp.PlayerGui.Main.Moveset:FindFirstChild("Supernova")
+    if ye4 then
+        local CD4 = ye4:FindFirstChild("InCooldown")
+        local function SupernovaLaunch()
+            if CD4.Value == "true" then return end
+            CD4.Value = "true"
+
+            -- Play initial animation
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://100446064103831"
+            local k = hum:LoadAnimation(anim)
+            k:Play()
+            k.Priority = Enum.AnimationPriority.Action2
+            k:AdjustSpeed(1)
+
+            -- Launch forward slightly
+            local bv = Instance.new("BodyVelocity")
+            bv.Parent = hrp
+            bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+            bv.Velocity = hrp.CFrame.LookVector * 35 + Vector3.new(0,150,0)
+            task.wait(.4)
+            bv:Destroy()
+
+            -- Full animation effects here (particles, camera, etc.)
+            -- Actual sky-launch handled in Part 5 using ReadyToSkyLaunch flag
+
+            task.wait(1.5)
+            k:Stop()
+            CD4.Value = "false"
+        end
+
+        -- Keybind
+        UserInputService.InputBegan:Connect(function(input, processed)
+            if processed then return end
+            if input.KeyCode == Enum.KeyCode.Four then
+                task.spawn(SupernovaLaunch)
+            end
+        end)
+        -- GUI Click
+        ye4.ItemName.MouseButton1Click:Connect(function()
+            task.spawn(SupernovaLaunch)
+        end)
+    end
+end
+
+-- Move 6 (Distortion) Setup
+if getgenv().Move6 == true then
+    local ye6 = lp.PlayerGui.Main.Moveset:FindFirstChild("Disortion")
+    if not ye6 then
+        ye6 = lp.PlayerGui.Main.Moveset:FindFirstChild("Blood Edge"):Clone()
+        ye6.Parent = lp.PlayerGui.Main.Moveset
+        ye6.Name = "Disortion"
+    end
+
+    ye6.Tip.Text = "CLOSE RANGE"
+    ye6.Cooldown.Size = UDim2.new(1,0,0,0)
+    ye6.BackgroundColor3 = Color3.fromRGB(70,0,0)
+    local CD6 = Instance.new("StringValue")
+    CD6.Name = "InCooldown"
+    CD6.Value = "false"
+    CD6.Parent = ye6
+
+    local function UseDistortion()
+        if CD6.Value == "true" then return end
+        CD6.Value = "true"
+
+        -- Small delay to prevent instant trigger
+        task.wait(0.2)
+
+        -- Affect all nearby enemies
+        for _, model in pairs(workspace.Characters:GetChildren()) do
+            if model:IsA("Model") and model ~= char and model:FindFirstChild("HumanoidRootPart") then
+                local hrp_other = model.HumanoidRootPart
+                hrp_other.Size = Vector3.new(55,55,55)
+                task.delay(3, function()
+                    if hrp_other then hrp_other.Size = Vector3.new(2,2,2) end
+                end)
+            end
+        end
+
+        _G.Use("Front Dash")  -- Optional effect trigger
+        task.delay(8.2, function() CD6.Value = "false" end)
+    end
+
+    -- Keybind
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+        if input.KeyCode == Enum.KeyCode.Six then
+            task.spawn(UseDistortion)
+        end
+    end)
+    -- GUI Click
+    ye6.ItemName.MouseButton1Click:Connect(function()
+        task.spawn(UseDistortion)
+    end)
+end
+-- LINDWURM MODIFIED SCRIPT - PART 5 (REWORKED FINAL)
+-- Handles sky launch, Self Sacrifice toggle, ultimate, and final effects
+
+-- Self Sacrifice toggle flag
+local SelfSacrificeEnabled = false
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.KeyCode == Enum.KeyCode.Five then
+        SelfSacrificeEnabled = not SelfSacrificeEnabled
+        local msg = SelfSacrificeEnabled and "Self Sacrifice ENABLED" or "Self Sacrifice DISABLED"
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "LINDWURM MODIFIED";
+            Text = msg;
+            Duration = 3;
+        })
+    end
+end)
+
+-- Ready to sky launch flag
+local ReadyToSkyLaunch = false
+
+-- Function triggered on successful hit
+local function OnBloodEdgeHit(target)
+    if not SelfSacrificeEnabled then return end
+    if not target or not target:FindFirstChild("HumanoidRootPart") then return end
+
+    ReadyToSkyLaunch = true
+
+    -- Launch animation and effects
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://108306129256457" -- Supernova Sky animation
+    local k = hum:LoadAnimation(anim)
+    k:Play()
+    k.Priority = Enum.AnimationPriority.Action2
+    k:AdjustSpeed(0.5)
+
+    -- BodyVelocity launch
+    local bv = Instance.new("BodyVelocity")
+    bv.Parent = hrp
+    bv.MaxForce = Vector3.new(1e10,1e10,1e10)
+    bv.Velocity = hrp.CFrame.LookVector * 25 + Vector3.new(0,150,0)
+    task.wait(3)
+    bv:Destroy()
+    k:Stop()
+
+    -- Reset flag
+    ReadyToSkyLaunch = false
+end
+
+-- Hook Blood Edge to hit detection
+local BloodEdgeMove = lp.PlayerGui.Main.Moveset:FindFirstChild("Blood Edge")
+if BloodEdgeMove then
+    local function BloodEdgeUse()
+        -- Simulate hit detection (replace with your real hit detection)
+        local parts = workspace.Characters:GetChildren()
+        for _, model in ipairs(parts) do
+            if model:IsA("Model") and model ~= char and model:FindFirstChild("HumanoidRootPart") then
+                local distance = (model.HumanoidRootPart.Position - hrp.Position).Magnitude
+                if distance <= 10 then -- adjust hit range
+                    OnBloodEdgeHit(model)
+                end
+            end
+        end
+    end
+
+    -- Keybind
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+        if input.KeyCode == Enum.KeyCode.One then
+            task.spawn(BloodEdgeUse)
+        end
+    end)
+    -- GUI click
+    BloodEdgeMove.ItemName.MouseButton1Click:Connect(function()
+        task.spawn(BloodEdgeUse)
+    end)
+end
+
+-- Ultimate Setup
+local ULT = lp.PlayerGui.Main:FindFirstChild("Ultimate")
+if ULT then
+    ULT.Bar.Fill.UIGradient.Rotation = 0
+    ULT.Bar.Fill.BackgroundColor3 = Color3.fromRGB(150,150,255)
+    ULT.Bar.Fill.BorderColor3 = Color3.fromRGB(0,0,255)
+    ULT.Bar.Fill.BorderSizePixel = 2
+    ULT.Bar.Ready.Ready.Text = "PRESS G TO START LINDWURMING IT"
+    ULT.Title.Text = "LINDWURM"
+
+    spawn(function()
+        while true do
+            if getgenv().Loop then break end
+            ULT.Bar.UIGradient.Rotation += 1
+            task.wait(.01)
+        end
+    end)
+end
+
+-- Ultimate Animation Hook
+char.Humanoid.AnimationPlayed:Connect(function(v)
+    if v.Animation.AnimationId == "rbxassetid://73953354465111" then
+        v:Stop()
+        local dia = char.Torso:WaitForChild("Dialogue")
+        dia.Chat1.BackgroundColor3 = Color3.new(1,0,0)
+        task.delay(1,function()
+            game.TweenService:Create(dia.Chat1,TweenInfo.new(1),
+                {BackgroundColor3 = Color3.new(1,1,1)}):Play()
+        end)
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://98934036433592"
+        local k = hum:LoadAnimation(anim)
+        k:Play()
+        k.Priority = Enum.AnimationPriority.Action2
+        k:AdjustSpeed(0.5)
+        k.TimePosition = 1.4
+        task.wait(2)
+        k:Stop(0.6)
+    end
+end)
+
+-- Particle effects for body parts
+local BodyParts = {"Head","Torso","Left Arm","Right Arm","Left Leg","Right Leg"}
+for _, partName in ipairs(BodyParts) do
+    local part = lp.Character:FindFirstChild(partName)
+    if part then
+        pcall(function() part.GlowS:Destroy() end)
+        pcall(function() part._Lsmoke:Destroy() end)
+        local v = Instance.new("ParticleEmitter", part)
+        v.Name = "_Lsmoke"
+        v.Lifetime = NumberRange.new(.1,7)
+        v.Rate = 55
+        v.Speed = NumberRange.new(.1)
+        v.Size = NumberSequence.new(0,1,0)
+        v.Texture = "rbxassetid://11789331771"
+        v.LightEmission = 10
+        v.LockedToPart = true
+        local v2 = Instance.new("ParticleEmitter", part)
+        v2.Name = "GlowS"
+        v2.Lifetime = NumberRange.new(2)
+        v2.Rate = 15
+        v2.Squash = NumberSequence.new({NumberSequenceKeypoint.new(0,15),NumberSequenceKeypoint.new(.5,15),NumberSequenceKeypoint.new(1,0)})
+        v2.Texture = "rbxassetid://11751891032"
+        v2.LightEmission = 10
+        v2.LockedToPart = true
+    end
+end
+
+-- Character Respawn Handler
+pcall(function() getgenv().pepe:Disconnect() end)
+getgenv().pepe = game.Players.LocalPlayer.CharacterAdded:Connect(function(c)
+    repeat task.wait() until c:FindFirstChild("HumanoidRootPart") and c:FindFirstChild("Humanoid")
+    task.wait(0.6)
+    -- reinitialize environment if needed
+end)
+
+-- Notification
+game.StarterGui:SetCore("SendNotification", {
+    Title = "LINDWURM MODIFIED";
+    Text = "Self Sacrifice now safely toggles sky launch on Blood Edge!";
+    Duration = 5;
+})
