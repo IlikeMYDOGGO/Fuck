@@ -1745,138 +1745,35 @@ end)
 
 -- END OF PART 5/5 - SCRIPT COMPLETE!
 -- Press 5 to toggle Self Sacrifice, then use Blood Edge (Move 1) to fly to the skies!
-
--- PASTE THIS AT THE VERY END OF YOUR SCRIPT
--- This fixes the sky launch to only work when Self Sacrifice is active
-
--- Initialize the toggle as OFF
-getgenv().SelfSacrificeActive = false
-
--- Override the Blood Edge animation handler with proper check
-local lp = game.Players.LocalPlayer
-local char = lp.Character
-local hrp = char.HumanoidRootPart
-
--- Disconnect any existing Blood Edge handler
-for name, connection in pairs(getgenv().connections or {}) do
-    if name:match("Move1") or name:match("Blood Edge") then
-        if typeof(connection) == "RBXScriptConnection" then
-            connection:Disconnect()
-            warn("Disconnected old Blood Edge handler: " .. name)
-        end
-    end
-end
-
--- Create new Blood Edge handler with proper Self Sacrifice check
-local newConnection = char.Humanoid.AnimationPlayed:Connect(function(v)
-    if v.Animation.AnimationId == "rbxassetid://127171275866632" then
-        
-        -- CHECK IF SELF SACRIFICE IS ACTIVE
-        if getgenv().SelfSacrificeActive ~= true then
-            -- SELF SACRIFICE IS OFF - DO NOTHING, LET NORMAL ANIMATION PLAY
-            warn("Self Sacrifice is OFF - Blood Edge plays normally")
-            return
-        end
-        
-        -- SELF SACRIFICE IS ON - PROCEED WITH SKY LAUNCH
-        warn("Self Sacrifice is ON - Activating sky launch!")
-        
-        -- Stop the normal animation
-        v:Stop()
-        
-        local Anim = Instance.new("Animation")
-        Anim.AnimationId = "rbxassetid://127374795448558"
-        local k = char.Humanoid:LoadAnimation(Anim)
-        k:Play(.3)
-        k.Priority = Enum.AnimationPriority.Action2
-        k:AdjustSpeed(2.5)
-        
-        task.wait(1)
-        k:AdjustSpeed(1)
-        
-        local done = false 
-        spawn(function()
-            for i = 1,155 do 
-                if done == true then return end
-                k.TimePosition = 2.5+i/200
-                task.wait() 
-            end
-            k:AdjustSpeed(.5)
-            for i = 1,999 do 
-                if done == true then return end
-                k.TimePosition = 3.5+math.random(-15,15)/255
-                task.wait() 
-            end
-        end)
-        
-        v.Stopped:Wait()  
-        done = true
-        k:Stop(.4)
-        
-        -- Launch upward
-        local bv = Instance.new('BodyVelocity')
-        bv.MaxForce=Vector3.new(10^10,10^10,10^10)
-        bv.Parent = hrp
-        spawn(function()
-            for i = 1,150 do 
-                bv.Velocity=Vector3.new(0,15,0)+hrp.CFrame.LookVector*50
-                task.wait(.01) 
-            end 
-        end)
-        task.delay(.2,function() bv:Destroy() end)
-        
-        -- Continue with full sky sequence
-        task.wait(.5)
-        
-        local Anim2 = Instance.new("Animation")
-        Anim2.AnimationId = "rbxassetid://108306129256457"
-        local k2 = char.Humanoid:LoadAnimation(Anim2)
-        k2:Play(.3)
-        k2.Priority = Enum.AnimationPriority.Action2
-        k2:AdjustSpeed(.5)
-        
-        local bv2 = Instance.new('BodyVelocity')
-        bv2.Parent = hrp 
-        bv2.MaxForce=Vector3.new(10^10,0,10^10)
-        spawn(function()
-            for i= 1,155 do 
-                local e = 25+i
-                bv2.Velocity = hrp.CFrame.LookVector*e
-                task.wait(.03)
-            end 
-        end)
-        task.wait(3)
--- Prevent Sky Launch from firing on script load
+-- Sky Launch Guard: requires SelfSacrifice + actual hit
 do
-    local ready = false
-    -- small delay to ignore any animations that were already playing
-    task.defer(function()
-        task.wait(0.1)
-        ready = true
-    end)
-
-    -- wrap original Blood Edge AnimationPlayed signal
-    local oldConnections = {}
-    for _, conn in ipairs(getconnections(char.Humanoid.AnimationPlayed)) do
-        table.insert(oldConnections, conn)
-        conn:Disable()  -- temporarily disable to prevent immediate firing
+    if getgenv().SelfSacrificeEnabled == nil then
+        getgenv().SelfSacrificeEnabled = false
     end
+    local CanSkyLaunch = false
 
-    task.defer(function()
-        -- re-enable all original connections after delay
-        task.wait(0.2)
-        for _, conn in ipairs(oldConnections) do
-            conn:Enable()
+    -- Hook Blood Edge animation
+    AddSignal(char.Humanoid.AnimationPlayed:Connect(function(track)
+        if track.Animation.AnimationId == "rbxassetid://100446064103831" then
+            if getgenv().SelfSacrificeEnabled and CanSkyLaunch then
+                -- Allow sky launch
+                CanSkyLaunch = false -- reset until next hit
+            else
+                -- Prevent sky launch
+                track:Stop()
+            end
+        end
+    end), "SkyLaunchGuard")
+
+    -- Hook hits from Blood Edge
+    hrp.Touched:Connect(function(hit)
+        local other = hit.Parent
+        if not other then return end
+        if other:FindFirstChild("Humanoid") and other ~= char then
+            -- Only allow sky launch if self-sacrifice is enabled
+            if getgenv().SelfSacrificeEnabled then
+                CanSkyLaunch = true
+            end
         end
     end)
-
-    -- extra safety: ignore any Blood Edge animation if SelfSacrifice not toggled
-    local oldFunc = char.Humanoid.AnimationPlayed:Connect
-    char.Humanoid.AnimationPlayed = function(_, animTrack)
-        if not ready then return end
-        if getgenv().SelfSacrificeEnabled ~= true and animTrack.Animation.AnimationId == "rbxassetid://100446064103831" then
-            return -- ignore Blood Edge animation until Self Sacrifice is toggled
-        end
-        return oldFunc(_, animTrack)
-    end
 end
