@@ -386,13 +386,31 @@ fhrp.CFrame=CFrame.new(0,10^10,0)
 getgenv().SelfSacrificeActive = false
 
 AddSignal(char.Humanoid.AnimationPlayed:Connect(function(v)
-if v.Animation.AnimationId == "rbxassetid://127171275866632" then
+if v.Animation.AnimationId == "rbxassetid://82531319990304" then
 
 if getgenv().SelfSacrificeActive ~= true then
 return
 end
 
 warn("Blood Edge detected with Self Sacrifice active - triggering sky launch")
+
+v:Stop()
+
+local freezePart = Instance.new('Part')
+freezePart.Anchored = true
+freezePart.CanCollide = false
+freezePart.Transparency = 1
+freezePart.Size = Vector3.new(4,6,4)
+freezePart.CFrame = hrp.CFrame
+freezePart.Parent = workspace
+
+local freezeWeld = Instance.new('Weld')
+freezeWeld.Part0 = freezePart
+freezeWeld.Part1 = hrp
+freezeWeld.Parent = freezePart
+
+char.Humanoid.WalkSpeed = 0
+char.Humanoid.JumpPower = 0
 
 local Anim = Instance.new("Animation")
 Anim.AnimationId = "rbxassetid://127374795448558"
@@ -413,9 +431,14 @@ for i = 1,999 do if done == true then return end
 k.TimePosition = 3.5+math.random(-15,15)/255
 task.wait() end
 end)
-v.Stopped:Wait()  
+
+repeat task.wait() until not k.IsPlaying or done == true
 done = true
 k:Stop(.4)
+
+freezePart:Destroy()
+char.Humanoid.WalkSpeed = 16
+char.Humanoid.JumpPower = 50
 
 local bv = Instance.new('BodyVelocity')
 bv.MaxForce=Vector3.new(10^10,10^10,10^10)
