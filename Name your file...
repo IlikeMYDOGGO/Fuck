@@ -417,6 +417,169 @@ v.Stopped:Wait()
 done = true
 k:Stop(.4)
 
+local bv = Instance.new('BodyVelocity')
+bv.MaxForce=Vector3.new(10^10,10^10,10^10)
+bv.Parent = hrp
+spawn(function()
+for i = 1,150 do 
+bv.Velocity=Vector3.new(0,15,0)+hrp.CFrame.LookVector*50
+task.wait(.01) end end)
+task.delay(.2,function() bv:Destroy() end)
+fhrp.CFrame=CFrame.new(0,10^10,0)
+
+task.wait(.5)
+
+local Anim2 = Instance.new("Animation")
+Anim2.AnimationId = "rbxassetid://108306129256457"
+local k2 = char.Humanoid:LoadAnimation(Anim2)
+k2:Play(.3)
+k2.Priority = Enum.AnimationPriority.Action2
+k2:AdjustSpeed(.5)
+local bv2 = Instance.new('BodyVelocity')
+bv2.Parent = hrp 
+bv2.MaxForce=Vector3.new(10^10,0,10^10)
+spawn(function()
+for i= 1,155 do 
+local e = 25+i
+bv2.Velocity = hrp.CFrame.LookVector*e
+task.wait(.03)
+end end)
+task.wait(3)
+k2:Stop(.4)
+bv2:Destroy()
+
+game.TweenService:Create(hrp,TweenInfo.new(.1),{CFrame = 
+CFrame.lookAt(hrp.Position, CFrame.new(-10, 155, -344).p) }):Play()
+
+local Anim3 = Instance.new("Animation")
+Anim3.AnimationId = "rbxassetid://139937896533570"
+local k3 = char.Humanoid:LoadAnimation(Anim3)
+k3:Play(.3)
+k3.Priority = Enum.AnimationPriority.Action2
+k3:AdjustSpeed(1)
+
+_G.PS(7094593247,1,.2,.1)
+_G.PS(7455246815,2)
+_G.PS(7455246815,2,0,.1)
+_G.PS(5563980633,2)
+_G.PS(7094593247,1,.2,.5)
+_G.PS(418302853,.2,.2,1.5)
+task.delay(.5,function()
+_G.PS(5563980633,2,0,.2)
+task.wait(.7)
+_G.PS(7455246815,5)
+_G.PS(9058297482,5,0,3)
+_G.PS(7455246815,5)
+end)
+
+task.wait(1.2)
+k3:AdjustSpeed(.04)
+k3.TimePosition = 1.4
+
+local bv3 = Instance.new('BodyPosition')
+bv3.Parent = hrp 
+bv3.D = 100 
+bv3.P = 195
+spawn(function()
+for i = 1,355 do 
+game.TweenService:Create(hrp,TweenInfo.new(.1),{CFrame = 
+CFrame.lookAt(hrp.Position, CFrame.new(-10, 155+i, -344+-i*2).p) }):Play()
+bv3.Position = CFrame.new(-10, 155+i, -344+-i*2).p
+task.wait(.01) end end)
+bv3.MaxForce=Vector3.new(9e9,9e9,9e9)
+task.wait(5)
+
+workspace.Gravity = 0
+k3:AdjustSpeed(1)
+task.wait(1)
+k3:Stop()
+
+local Anim4 = Instance.new("Animation")
+Anim4.AnimationId = "rbxassetid://121718733604230"
+local k4 = char.Humanoid:LoadAnimation(Anim4)
+k4:Play(.3)
+k4.Priority = Enum.AnimationPriority.Action2
+k4:AdjustSpeed(1)
+bv3.P = 595
+
+_G.PS(7455246815,2)
+_G.PS(7455246815,2,0,.1)
+_G.PS(5563980633,2)
+_G.PS(7094593247,1,.2,.5)
+_G.PS(418302853,.2,.2,1.5)
+task.delay(.5,function()
+_G.PS(5563980633,2,0,2)
+task.wait(.8)
+_G.PS(7455246815,2)
+_G.PS(7455246815,2,0,.1)
+_G.PS(5563980633,2)
+_G.PS(7094593247,2,.2,1.5)
+_G.PS(418302853,2,.2,1.5)
+end)
+
+task.wait(1.2)
+_G.PS(1691468753,2,0,.25)
+_G.PS(1691468753,2,0,.2)
+
+local e = 0
+for i = 1,250 do e=e+1
+local p = Instance.new('Part')
+p.Parent = char.SetAssets 
+p.Material = Enum.Material.Neon 
+p.Size=Vector3.new(1,1,1)
+p.Anchored=true p.CanCollide=false
+local msh2 = Instance.new("SpecialMesh",p)
+msh2.MeshType = "Sphere"
+if e >= 15 then e = 0 end
+if e >= 10 then 
+p.Color=Color3.new(1,0,1)
+elseif e >= 5 then
+p.Color=Color3.new(1,1,0)
+else 
+p.Color=Color3.new(0,0,1)
+end
+msh2.Scale = Vector3.new(0,15,0)
+game.TweenService:Create(msh2,TweenInfo.new(9),
+{Scale=Vector3.new(1,100,1)}):Play()
+p.CFrame = CFrame.new(hrp.CFrame.X+.3,hrp.CFrame.Y+9+i/5,hrp.CFrame.Z)*
+CFrame.Angles(0,i,0)
+game:GetService("Debris"):AddItem(p, 26)
+spawn(function()
+game.TweenService:Create(p,TweenInfo.new(1),
+{CFrame = p.CFrame*CFrame.new(i/15,-i*3,0)}):Play()
+task.wait(.7)
+local ok = p.CFrame
+workspace.CurrentCamera.CameraType = 'Scriptable'
+for e = 1,255 do
+if i == 1 then 
+workspace.CurrentCamera.CFrame = CFrame.new(hrp.CFrame.X,-4+hrp.CFrame.Y,hrp.CFrame.Z)*
+CFrame.Angles(math.rad(-90),0,0)
+end
+game.TweenService:Create(p,TweenInfo.new(.3),{CFrame =
+ok*CFrame.Angles(0,0,e/15)*CFrame.new(math.cos(e/15)*15,0,math.sin(e/15)*15)}):Play()
+task.wait(.01) end
+end)
+end
+
+task.wait(4)
+bv3:Destroy()
+workspace.Gravity = 15.2
+task.wait(5)
+workspace.Gravity = 198.2
+workspace.CurrentCamera.CameraType = 'Custom'
+
+getgenv().SelfSacrificeActive = false
+warn("Sky launch complete - Self Sacrifice deactivated")
+
+pcall(function()
+local ye = lp.PlayerGui.Main.Moveset['Self Sacrifice']
+ye.Tip.Text = 'SPECIAL'
+ye.Cooldown.BackgroundColor3=Color3.new(.3,0,0)
+ye.Cooldown.UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, 
+Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(1.00,
+Color3.fromRGB(0, 0, 0))}
+end)
+
 end end), "Move1")
 
 pcall(function() lp.PlayerGui.Main.Moveset['Self Sacrifice']:Destroy() end)
